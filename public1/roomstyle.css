@@ -1,0 +1,76 @@
+body {
+    color: black;
+    background-color: #EA5C5A;
+    font-family: Karla, Arial;
+    text-align: center;
+    font-size: 25px;
+
+}
+
+h1 {
+    font-size: 80px;
+    padding: 10px;
+    font-family: Karla, Arial;
+    letter-spacing: 2px;
+    color: white
+}
+
+
+  #chatChannel {
+    background-color: white;
+    margin: 10px 350px 10px 350px;
+  }
+
+  #heading {
+      color: white;
+      font-size: 40px;
+      background-color: rgb(64, 128, 212);
+      font-weight: bold;
+  }
+
+  ul {
+    list-style: none;
+    text-align: left;
+    height: 200px; 
+    overflow: auto;
+    border: 1px;
+  }
+
+
+ #id {
+     width: 100%;
+     padding: 2px 2px 2px 2px;
+
+ }
+
+ #chatMessage {
+    width: 100%;
+    border-radius: 8px;
+    padding: 2px 2px 2px 2px;
+
+}
+
+#chat {
+    border-style: solid;
+    border-width: 2px;
+    margin: 2px 2px 2px 2px;
+}
+
+
+
+
+ #videoLink {
+    font-family: Karla, Arial;
+    font-size: 25px;
+    text-align: center;
+    width : 500px;
+    height: 40px;
+    border-style: solid;
+    border-width: 1px;
+
+  }
+
+
+#mod {
+    color: red;
+}

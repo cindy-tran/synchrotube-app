@@ -1,0 +1,68 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<link href="style.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css?family=Karla" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
+<body>
+<div class="container-fluid">
+<h1>SynchroTube</h1>
+Chat and watch synchronized YouTube videos with friends <br><br>
+
+
+<form action="/room.html">
+    <input type="text" id="displayName" name="dname" placeholder="Enter a display name" required>
+  <h2>  Create a new chat channel:</h2>
+    <input type="text" id="chatName" name="chatName"></input>
+    <input type="submit" value="JOIN" class="btn btn-primary" onclick="return checkForm()"></input>
+  </form> 
+
+<h2>Or join an active chat channel: </h2>
+<ul>
+    <div class="chatChannels">
+        <div id="heading">ACTIVE CHAT CHANNELS</div>
+        <% if(rooms.length == 0) { %>
+            <p> There are currently no chat channels active. Please create a new chat channel.</p>
+        <% } %>
+        <% rooms.forEach((room) => { %>
+            <li><%= room.room  %></li>
+        <% }) %>
+    </div>
+</ul>
+
+</div>
+</body>
+
+<script>
+    function checkForm() {
+        var rooms = <%-JSON.stringify(rooms)%>;
+        for (var i = 0; i < rooms.length; i++) {
+            if (rooms[i].room == document.getElementById("chatName").value) {
+                alert("Sorry, a room with that name is already active.");
+                return false;
+            }
+        }
+    }
+
+        
+    $("li").click(function(){
+        var rooms = <%-JSON.stringify(rooms)%>;
+        for (var i = 0; i < rooms.length; i++) {
+            for (var n = 0; n < rooms[i].users.length; n++) {
+                if(rooms[i].users[n].displayName == document.getElementById("displayName").value) {
+                    alert("Sorry, a user with that name already exists");
+                    return false;
+                }
+            }
+        }
+        var roomName = $(this).text();
+        var displayName = document.getElementById("displayName").value;
+        if(displayName == null || displayName == "") {
+            alert("Display name cannot be blank!");
+        } else {
+            window.location = "room.html?dname="+ displayName + "&" + "chatName=" + roomName;
+        }
+    });
+</script>

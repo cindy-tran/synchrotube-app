@@ -1,0 +1,169 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<link href="roomstyle.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css?family=Karla" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+
+<body>
+
+    <div id="chatChannel">
+        <div id="heading"></div><br>
+        <div id="player"></div> <br>
+        <input type="text" id="videoLink" placeholder="Enter the video link here" name="videoName"/>
+        <button id="vidChange" class="btn btn-primary">SEND</button><br>
+        Moderator: <span id="mod"></span>
+        <div id="chat">
+            <ul>
+
+            </ul>
+            <input id="chatMessage" type="text" placeholder="Type your message here.." />
+            <button id="input" class="btn btn-primary">SEND</button>
+        </div>
+    </div>
+</body>
+
+
+<script>
+  // This makes an object from the URL parameters
+var search = location.search.substring(1);
+var obj = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
+
+
+//Connect the client (this) to the server
+var socket = io.connect('http://localhost:4000');
+var socket = io.connect();
+
+var room = obj.chatName;
+var displayName = obj.dname;
+socket.emit('requestVideoId', room);
+
+var vid = 's_OYcu-y4OY';
+var mod = '';
+socket.on('receiveVideoId', function(data) {
+    vid = data.vid;
+    mod = data.mod;
+    document.getElementById('mod').textContent = mod;
+});
+
+
+          // 2. This code loads the IFrame Player API code asynchronously.
+  var tag = document.createElement('script');
+  
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  // 3. This function creates an <iframe> (and YouTube player)
+  //    after the API code downloads.
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      height: '390',
+      width: '640',
+      videoId: '7RS1h-FKQ0k',
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  }
+
+  // 4. The API will call this function when the video player is ready.
+  function onPlayerReady(event) {
+    player.loadVideoById(vid);
+  }
+
+  // 5. The API calls this function when the player's state changes.
+  //    The function indicates that when playing a video (state=1),
+  //    the player should play for six seconds and then stop.
+  var done = false;
+  function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.PLAYING && !done) {
+      done = true;
+    }
+  }
+  function stopVideo() {
+    player.stopVideo();
+  }
+
+document.getElementById('heading').textContent = "ROOM NAME: " + room.toUpperCase();
+
+
+function getRandomColor() { 
+    var letters = '0123456789ABCDEF'; 
+    var color = '#'; 
+    for (var i = 0; i < 6; i++) { 
+        color += letters[Math.floor(Math.random() * 16)]; 
+    }
+    return color;
+}
+
+var displayColor = getRandomColor();
+
+
+document.getElementById("vidChange").addEventListener("click", function(){
+    var video = document.getElementById("videoLink").value;
+    var videoId = video.split('=')[1];
+    data = {dName: obj.dname, rName: obj.chatName, vidId: videoId}; 
+    socket.emit('changeVid', data);  
+
+});
+
+
+document.getElementById("chatMessage").addEventListener("keyup", function(event) {
+  event.preventDefault();
+  if (event.keyCode === 13) {
+    document.getElementById("input").click();
+  }
+});
+
+document.getElementById("input").addEventListener("click", function(){
+    var message = document.getElementById("chatMessage").value;
+    console.log(displayColor);
+    data = {dName: displayName, rName: room, chatMsg: message, dColor: displayColor}
+    socket.emit('chat', data);
+    document.getElementById("chatMessage").value = "";
+
+});
+
+socket.on('error', function() {
+  alert('Sorry, you are not the moderator of this room');
+})
+
+socket.on('changeVideo', function(videoId) {
+  player.loadVideoById(videoId);
+})
+
+socket.on('connect', function() {
+   // connect to the server 
+   data = {dName: obj.dname, rName: obj.chatName, dColor: displayColor}; // data = {dname: displayName, rName: roomName}
+   socket.emit('data', data); // 
+});
+
+socket.on('chat', function(data) {
+    var html = "<li><font color=" + data.dColor + ">" + data.dName + ":</font> " + data.chatMsg + " </li>";
+    $("ul").append(html);
+});
+
+socket.on('welcome', function(data) {
+    var html = "<li><font color=" + data.dColor + ">" + data.name + "</font> joined the chat </li>";
+    $("ul").append(html);
+});
+
+socket.on('goodbye', function(data) {
+    var html = "<li>" + data.name + " has left the chat </li>";
+    if (data.newMod != '') {
+      html += "<li>" + data.newMod + " is now the moderator </li>";
+      document.getElementById('mod').textContent = data.newMod;
+    }
+    $("ul").append(html);
+
+});
+
+
+
+</script>
